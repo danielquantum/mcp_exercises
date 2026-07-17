@@ -39,7 +39,7 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 3. Install dependencies:
 
 ```bash
-uv pip install -e .
+uv pip install -e .uv pip install -e .
 ```
 
 4. Run the project
