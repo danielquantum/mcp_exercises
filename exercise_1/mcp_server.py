@@ -1,3 +1,4 @@
+from pydantic import Field
 from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("DocumentMCP", log_level="ERROR")
@@ -13,6 +14,17 @@ docs = {
 }
 
 # TODO: Write a tool to read a doc
+@mcp.tool(
+    name="read_doc",
+    description="Read the contents of a document and return it as a string.",
+)
+def read_document(
+    doc_id: str = Field(description="Id of the document to read")
+):
+    if doc_id not in docs:
+        return ValueError(f"Document with id '{doc_id}' not found.")
+    return docs[doc_id]
+
 # TODO: Write a tool to edit a doc
 # TODO: Write a resource to return all doc id's
 # TODO: Write a resource to return the contents of a particular doc
