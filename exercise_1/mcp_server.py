@@ -1,5 +1,6 @@
 from pydantic import Field
 from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp.prompts import base
 
 mcp = FastMCP("DocumentMCP", log_level="ERROR")
 
@@ -15,7 +16,7 @@ docs = {
 
 # TODO: Write a tool to read a doc
 @mcp.tool(
-    name="read_doc",
+    name="read_document",
     description="Read the contents of a document and return it as a string.",
 )
 def read_document(
@@ -27,7 +28,7 @@ def read_document(
 
 # TODO: Write a tool to edit a doc
 @mcp.tool(
-    name="edit_doc",
+    name="edit_document",
     description="Edit a document by replacing a string in the documents content with a new string.",
 )
 def edit_document(
@@ -41,9 +42,67 @@ def edit_document(
     return docs[doc_id]
 
 # TODO: Write a resource to return all doc id's
+@mcp.resource(
+    name="list_documents",
+    description="Return a list of all document ids.",
+)
+def list_documents():
+    return list(docs.keys())
+
 # TODO: Write a resource to return the contents of a particular doc
+@mcp.resource(
+    name="get_document",
+    description="Return the contents of a document given its id.",  
+)
+def get_document(
+    doc_id: str = Field(description="Id of the document to retrieve.")
+):
+    if doc_id not in docs:
+        return ValueError(f"Document with id '{doc_id}' not found.")
+    return docs[doc_id]
+
 # TODO: Write a prompt to rewrite a doc in markdown format
+@mcp.prompt(
+    name="rewrite_doc_markdown",
+    description="Rewrite a document in markdown format.",
+)
+def rewrite_doc_markdown(
+    doc_id: str = Field(description="Id of the document to format"),
+) -> list[base.Message]:
+    prompt = f"""
+    Your goal is to reformat a document to be written with markdown syntax.
+
+    The id of the document you need to reformat is:
+    <document_id>
+    {doc_id}
+    </document_id>
+
+    Add in headers, bullet points, tables, etc as necessary. Feel free to add in extra text, but don't change the meaning of the report.
+    Use the 'edit_document' tool to edit the document. After the document has been edited, respond with the final version of the doc. Don't explain your changes.
+    """
+
+    return [base.UserMessage(prompt)]
 # TODO: Write a prompt to summarize a doc
+@mcp.prompt(
+    name="summarize_doc",
+    description="Summarize a document.",
+)
+def summarize_doc(
+    doc_id: str = Field(description="Id of the document to summarize"),
+) -> list[base.Message]:
+    prompt = f"""
+    Your goal is to summarize a document.
+
+    The id of the document you need to summarize is:
+    <document_id>
+    {doc_id}
+    </document_id>
+
+    Summarize the document in a few sentences. Don't change the meaning of the report.
+    Use the 'edit_document' tool to edit the document. After the document has been edited, respond with the final version of the doc. Don't explain your changes.
+    """
+
+    return [base.UserMessage(prompt)]
 
 
 if __name__ == "__main__":
