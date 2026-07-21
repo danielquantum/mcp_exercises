@@ -43,20 +43,18 @@ def edit_document(
 
 # TODO: Write a resource to return all doc id's
 @mcp.resource(
-    name="list_documents",
-    description="Return a list of all document ids.",
+    "docs://documents",
+    mime_type="application/json"
 )
-def list_documents():
+def list_documents() -> list[str]:
     return list(docs.keys())
 
 # TODO: Write a resource to return the contents of a particular doc
 @mcp.resource(
-    name="get_document",
-    description="Return the contents of a document given its id.",  
+    "docs://documents/{doc_id}",
+    mime_type="text/plain"
 )
-def get_document(
-    doc_id: str = Field(description="Id of the document to retrieve.")
-):
+def fetch_document(doc_id: str) -> str:  
     if doc_id not in docs:
         return ValueError(f"Document with id '{doc_id}' not found.")
     return docs[doc_id]
